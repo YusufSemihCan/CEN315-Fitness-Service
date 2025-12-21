@@ -1,21 +1,19 @@
+using Fitness_Service_API.Infrastructure; // Import the new class
 using Fitness_Service_API.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add controllers
-builder.Services.AddControllers();
-
-// Register domain services
-builder.Services.AddScoped<IPricingService, PricingService>();
-builder.Services.AddScoped<IReservationService, ReservationService>();
-
-// Swagger (very useful for demo & Postman)
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+// =================================================================
+// SERVICE REGISTRATION (Moved to Testable Method)
+// =================================================================
+// This single line replaces all the builder.Services.Add... calls
+builder.Services.AddApplicationServices();
 
 var app = builder.Build();
 
-// Configure HTTP pipeline
+// =================================================================
+// MIDDLEWARE PIPELINE (Remains in Program.cs)
+// =================================================================
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
@@ -29,3 +27,6 @@ app.UseAuthorization();
 app.MapControllers();
 
 app.Run();
+
+// Keep this! It is still good practice for Integration Tests if you add them later.
+public partial class Program { }

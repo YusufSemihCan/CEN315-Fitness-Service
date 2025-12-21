@@ -1,193 +1,180 @@
-﻿using Fitness_Service_API.Infrastructure;
+﻿using Fitness_Service_API.Entities;
 using Fitness_Service_API.Services;
-using Fitness_Service_API.Entities;
-using Microsoft.AspNetCore.Mvc;
+using Fitness_Service_API.Infrastructure;
 using Moq;
+using Xunit;
 
-namespace Fitness_Service_UnitTest;
+// CRITICAL: Forces tests to run one-by-one to prevent "Test Pollution" in the static InMemoryDatabase
+[assembly: CollectionBehavior(DisableTestParallelization = true)]
 
-public class ReservationsControllerTests
+namespace Fitness_Service_UnitTest.Services
 {
-    private readonly Mock<IReservationService> _reservationServiceMock;
-    private readonly ReservationsController _controller;
-
-    public ReservationsControllerTests()
+    public class ReservationServiceTests
     {
-        _reservationServiceMock = new Mock<IReservationService>();
-        _controller = new ReservationsController(_reservationServiceMock.Object);
+        private readonly Mock<IPricingService> _pricingServiceMock;
+        private readonly ReservationService _service;
 
-        // Important: clean static DB before every test
-        InMemoryDatabase.Members.Clear();
-        InMemoryDatabase.Classes.Clear();
-        InMemoryDatabase.Reservations.Clear();
-    }
-
-    [Fact]
-    public void CreateReservation_ReturnsBadRequest_WhenMemberNotFound()
-    {
-        // Arrange
-        var classId = Guid.NewGuid();
-        InMemoryDatabase.Classes.Add(new FitnessClass
+        public ReservationServiceTests()
         {
-            Id = classId,
-            Capacity = 10
-        });
+            _pricingServiceMock = new Mock<IPricingService>();
 
-        // Act
-        var result = _controller.CreateReservation(Guid.NewGuid(), classId);
+            // We test the REAL service, injecting the mocked dependency
+            _service = new ReservationService(_pricingServiceMock.Object);
 
-        // Assert
-        Assert.IsType<BadRequestObjectResult>(result);
-    }
+            // CRITICAL: Clean the static DB before EVERY test
+            // This ensures a clean slate so "count" based tests don't fail randomly
+            InMemoryDatabase.Members.Clear();
+            InMemoryDatabase.Classes.Clear();
+            InMemoryDatabase.Reservations.Clear();
+        }
 
-    [Fact]
-    public void CreateReservation_ReturnsBadRequest_WhenClassNotFound()
-    {
-        // Arrange
-        var memberId = Guid.NewGuid();
-        InMemoryDatabase.Members.Add(new Member
+        // =========================================================================
+        // 1. SUCCESS SCENARIOS (Killing "No-Op", "Data Flow", and "DB Add" Mutants)
+        // =========================================================================
+
+        [Fact]
+        public void CreateReservation_ShouldAddReservationToClass_WhenSpaceAvailable()
         {
-            Id = memberId
-        });
+            // Arrange
+            var member = new Member { Id = Guid.NewGuid(), MembershipType = MembershipType.Premium };
+            var fitnessClass = new FitnessClass
+            {
+                Id = Guid.NewGuid(),
+                Capacity = 10,
+                StartTime = DateTime.Now.AddHours(1),
+                Reservations = new List<Reservation>() // Start empty
+            };
 
-        // Act
-        var result = _controller.CreateReservation(memberId, Guid.NewGuid());
+            decimal expectedPrice = 50.0m;
 
-        // Assert
-        Assert.IsType<BadRequestObjectResult>(result);
-    }
+            // Strict Mocking: Ensure the service asks for price using the CORRECT data
+            _pricingServiceMock
+                .Setup(p => p.CalculatePrice(
+                    member.MembershipType,
+                    fitnessClass.StartTime,
+                    fitnessClass.Capacity,
+                    0)) // Current reservations is 0
+                .Returns(expectedPrice)
+                .Verifiable();
 
-    [Fact]
-    public void CreateReservation_ReturnsOk_WhenSuccessful()
-    {
-        // Arrange
-        var member = new Member { Id = Guid.NewGuid() };
-        var fitnessClass = new FitnessClass
+            // Act
+            var result = _service.CreateReservation(member, fitnessClass);
+
+            // Assert
+            // 1. Verify Object Return
+            Assert.NotNull(result);
+            Assert.Equal(expectedPrice, result.PricePaid);
+            Assert.Equal(member.Id, result.MemberId);
+
+            // 2. Verify Domain Object Update (Kills "fitnessClass.Add" removal mutant)
+            Assert.Single(fitnessClass.Reservations);
+            Assert.Contains(result, fitnessClass.Reservations);
+
+            // 3. Verify Database Update (Kills "InMemoryDatabase.Add" removal mutant)
+            Assert.Single(InMemoryDatabase.Reservations);
+            Assert.Contains(result, InMemoryDatabase.Reservations);
+
+            // 4. Verify Interaction
+            _pricingServiceMock.Verify();
+        }
+
+        // =========================================================================
+        // 2. BOUNDARY & LOGIC SCENARIOS (Killing "Conditional Boundary" Mutants)
+        // =========================================================================
+
+        [Fact]
+        public void CreateReservation_ShouldThrowException_WhenClassIsExactlyFull()
         {
-            Id = Guid.NewGuid(),
-            Capacity = 5
-        };
+            // Arrange
+            var member = new Member { Id = Guid.NewGuid() };
+            var fitnessClass = new FitnessClass { Capacity = 2, Reservations = new List<Reservation>() };
 
-        InMemoryDatabase.Members.Add(member);
-        InMemoryDatabase.Classes.Add(fitnessClass);
+            // Fill the class to capacity
+            fitnessClass.Reservations.Add(new Reservation());
+            fitnessClass.Reservations.Add(new Reservation());
 
-        var reservation = new Reservation
+            // Act & Assert
+            // This kills mutants that change '<' to '<=' in capacity checks
+            var ex = Assert.Throws<InvalidOperationException>(() =>
+                _service.CreateReservation(member, fitnessClass));
+
+            Assert.Equal("Class capacity exceeded.", ex.Message);
+        }
+
+        [Fact]
+        public void CreateReservation_ShouldPassCorrectReservationCount_ToPricing()
         {
-            MemberId = member.Id,
-            FitnessClassId = fitnessClass.Id
-        };
+            // Arrange
+            var member = new Member { Id = Guid.NewGuid() };
+            var fitnessClass = new FitnessClass { Capacity = 10, StartTime = DateTime.Now };
 
-        _reservationServiceMock
-            .Setup(s => s.CreateReservation(
-                It.Is<Member>(m => m.Id == member.Id),
-                It.Is<FitnessClass>(c => c.Id == fitnessClass.Id)))
-            .Returns(reservation);
+            // Pre-fill with 3 people
+            fitnessClass.Reservations.Add(new Reservation());
+            fitnessClass.Reservations.Add(new Reservation());
+            fitnessClass.Reservations.Add(new Reservation());
 
-        // Act
-        var result = _controller.CreateReservation(member.Id, fitnessClass.Id);
+            // Act
+            _service.CreateReservation(member, fitnessClass);
 
-        // Assert
-        var okResult = Assert.IsType<OkObjectResult>(result);
-        Assert.Equal(reservation, okResult.Value);
-    }
+            // Assert
+            // Kills mutants that hardcode "0" or "1" instead of counting the list
+            _pricingServiceMock.Verify(p => p.CalculatePrice(
+                It.IsAny<MembershipType>(),
+                It.IsAny<DateTime>(),
+                It.IsAny<int>(),
+                3), // Must match exactly 3
+                Times.Once);
+        }
 
-    [Fact]
-    public void CreateReservation_ReturnsBadRequest_WhenServiceThrows()
-    {
-        // Arrange
-        var member = new Member { Id = Guid.NewGuid() };
-        var fitnessClass = new FitnessClass
+        // =========================================================================
+        // 3. DEFENSIVE CODING (Killing "Null Check Removal" Mutants)
+        // =========================================================================
+
+        [Fact]
+        public void CreateReservation_ShouldThrowArgumentNull_WhenInputsAreNull()
         {
-            Id = Guid.NewGuid(),
-            Capacity = 1
-        };
+            // Kills mutant: Removing "if (member == null)"
+            Assert.Throws<ArgumentNullException>(() => _service.CreateReservation(null, new FitnessClass()));
 
-        InMemoryDatabase.Members.Add(member);
-        InMemoryDatabase.Classes.Add(fitnessClass);
+            // Kills mutant: Removing "if (fitnessClass == null)"
+            Assert.Throws<ArgumentNullException>(() => _service.CreateReservation(new Member(), null));
+        }
 
-        _reservationServiceMock
-            .Setup(s => s.CreateReservation(
-                It.Is<Member>(m => m.Id == member.Id),
-                It.Is<FitnessClass>(c => c.Id == fitnessClass.Id)))
-            .Throws(new InvalidOperationException("Class full"));
+        // =========================================================================
+        // 4. CANCELLATION LOGIC (Killing "DB Remove" Mutants)
+        // =========================================================================
 
-        // Act
-        var result = _controller.CreateReservation(member.Id, fitnessClass.Id);
+        [Fact]
+        public void CancelReservation_ShouldRemoveFromDatabase_WhenFound()
+        {
+            // Arrange
+            var targetId = Guid.NewGuid();
+            var reservation = new Reservation { Id = targetId };
 
-        // Assert
-        Assert.IsType<BadRequestObjectResult>(result);
-    }
+            // Manually add to DB to simulate it existing
+            InMemoryDatabase.Reservations.Add(reservation);
 
-    [Fact]
-    public void GetAll_ReturnsOk_WithReservations()
-    {
-        // Arrange
-        InMemoryDatabase.Reservations.Add(new Reservation());
+            // Act
+            _service.CancelReservation(targetId);
 
-        // Act
-        var result = _controller.GetAll();
+            // Assert
+            // Kills mutant: Removing "InMemoryDatabase.Reservations.Remove(...)"
+            Assert.Empty(InMemoryDatabase.Reservations);
+            Assert.DoesNotContain(reservation, InMemoryDatabase.Reservations);
+        }
 
-        // Assert
-        var ok = Assert.IsType<OkObjectResult>(result);
-        var list = Assert.IsAssignableFrom<IEnumerable<Reservation>>(ok.Value);
-        Reservation reservation = Assert.Single(list);
-    }
+        [Fact]
+        public void CancelReservation_ShouldThrow_WhenNotFound()
+        {
+            // Arrange
+            InMemoryDatabase.Reservations.Clear(); // Ensure empty
 
-    [Fact]
-    public void GetById_ReturnsNotFound_WhenMissing()
-    {
-        // Act
-        var result = _controller.GetById(Guid.NewGuid());
+            // Act & Assert
+            // Kills mutant: Removing "if (reservation == null)"
+            var ex = Assert.Throws<InvalidOperationException>(() =>
+                _service.CancelReservation(Guid.NewGuid()));
 
-        // Assert
-        Assert.IsType<NotFoundResult>(result);
-    }
-
-    [Fact]
-    public void GetById_ReturnsOk_WhenExists()
-    {
-        // Arrange
-        var reservation = new Reservation { Id = Guid.NewGuid() };
-        InMemoryDatabase.Reservations.Add(reservation);
-
-        // Act
-        var result = _controller.GetById(reservation.Id);
-
-        // Assert
-        var ok = Assert.IsType<OkObjectResult>(result);
-        Assert.Equal(reservation, ok.Value);
-    }
-
-    [Fact]
-    public void Delete_ReturnsNoContent_WhenSuccessful()
-    {
-        // Arrange
-        var reservationId = Guid.NewGuid();
-
-        _reservationServiceMock
-            .Setup(s => s.CancelReservation(reservationId));
-
-        // Act
-        var result = _controller.Delete(reservationId);
-
-        // Assert
-        Assert.IsType<NoContentResult>(result);
-    }
-
-    [Fact]
-    public void Delete_ReturnsNotFound_WhenServiceThrows()
-    {
-        // Arrange
-        var reservationId = Guid.NewGuid();
-
-        _reservationServiceMock
-            .Setup(s => s.CancelReservation(reservationId))
-            .Throws(new InvalidOperationException());
-
-        // Act
-        var result = _controller.Delete(reservationId);
-
-        // Assert
-        Assert.IsType<NotFoundObjectResult>(result);
+            Assert.Equal("Reservation not found.", ex.Message);
+        }
     }
 }

@@ -4,7 +4,7 @@ namespace Fitness_Service_API.Services;
 
 public class PricingService : IPricingService
 {
-    private const decimal BasePrice = 100m;
+    private readonly decimal BasePrice = 100m;
 
     public decimal CalculatePrice(
         MembershipType membershipType,

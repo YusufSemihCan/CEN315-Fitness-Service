@@ -1,43 +1,63 @@
 ﻿using Fitness_Service_API.Controllers;
+using Fitness_Service_API.Entities;
+using Fitness_Service_API.Infrastructure;
 using Microsoft.AspNetCore.Mvc;
+using Xunit;
 
-
-namespace Fitness_Service_UnitTest;
-
-public class ClassesControllerTests
+namespace Fitness_Service_UnitTest.Controllers
 {
-    [Fact]
-    public void CreateClass_ReturnsCreatedClass()
+    public class ClassesControllerTests
     {
-        // Arrange
-        var controller = new ClassesController();
-        var fitnessClass = new FitnessClass
+        private readonly ClassesController _controller;
+
+        public ClassesControllerTests()
         {
-            Name = "Yoga",
-            Instructor = "Alice",
-            Capacity = 10,
-            StartTime = DateTime.Today.AddHours(10)
-        };
+            _controller = new ClassesController();
 
-        // Act
-        var result = controller.CreateClass(fitnessClass);
+            // CRITICAL: Reset static state to prevent test pollution
+            InMemoryDatabase.Classes.Clear();
+        }
 
-        // Assert
-        var createdResult = Assert.IsType<CreatedAtActionResult>(result);
-        var returnedClass = Assert.IsType<FitnessClass>(createdResult.Value);
-        Assert.Equal("Yoga", returnedClass.Name);
-    }
+        [Fact]
+        public void CreateClass_ShouldAddToDatabase_AndReturnCreated()
+        {
+            // Arrange
+            var fitnessClass = new FitnessClass
+            {
+                Name = "Pilates",
+                Instructor = "Alice",
+                Capacity = 15,
+                StartTime = DateTime.Now.AddDays(1)
+            };
 
-    [Fact]
-    public void GetClasses_ReturnsOkResult()
-    {
-        // Arrange
-        var controller = new ClassesController();
+            // Act
+            var result = _controller.CreateClass(fitnessClass);
 
-        // Act
-        var result = controller.GetClasses();
+            // Assert
+            // 1. Verify Return Type
+            var createdResult = Assert.IsType<CreatedAtActionResult>(result);
+            Assert.Equal(nameof(_controller.GetClasses), createdResult.ActionName);
 
-        // Assert
-        Assert.IsType<OkObjectResult>(result);
+            // 2. Kill Mutant: "Void method call removal" (Did it actually save?)
+            Assert.Single(InMemoryDatabase.Classes);
+            Assert.Equal(fitnessClass.Id, InMemoryDatabase.Classes[0].Id);
+        }
+
+        [Fact]
+        public void GetClasses_ShouldReturnAllClasses_FromDatabase()
+        {
+            // Arrange
+            InMemoryDatabase.Classes.Add(new FitnessClass { Name = "Yoga" });
+            InMemoryDatabase.Classes.Add(new FitnessClass { Name = "Spin" });
+
+            // Act
+            var result = _controller.GetClasses();
+
+            // Assert
+            var okResult = Assert.IsType<OkObjectResult>(result);
+            var returnedClasses = Assert.IsAssignableFrom<List<FitnessClass>>(okResult.Value);
+
+            Assert.Equal(2, returnedClasses.Count);
+        }
     }
 }

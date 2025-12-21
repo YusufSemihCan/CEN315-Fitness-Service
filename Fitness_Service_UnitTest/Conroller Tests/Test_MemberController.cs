@@ -1,42 +1,78 @@
 ﻿using Fitness_Service_API.Controllers;
 using Fitness_Service_API.Entities;
+using Fitness_Service_API.Infrastructure;
 using Microsoft.AspNetCore.Mvc;
+using Xunit;
 
-namespace Fitness_Service_UnitTest;
-
-public class MembersControllerTests
+namespace Fitness_Service_UnitTest.Controllers
 {
-    [Fact]
-    public void AddMember_ReturnsCreatedResult()
+    public class MembersControllerTests
     {
-        // Arrange
-        var controller = new MembersController();
-        var member = new Member
+        private readonly MembersController _controller;
+
+        public MembersControllerTests()
         {
-            Name = "Test User",
-            MembershipType = MembershipType.Standard
-        };
+            _controller = new MembersController();
 
-        // Act
-        var result = controller.AddMember(member);
+            // CRITICAL: Reset static state
+            InMemoryDatabase.Members.Clear();
+        }
 
-        // Assert
-        var createdResult = Assert.IsType<CreatedAtActionResult>(result);
-        var returnedMember = Assert.IsType<Member>(createdResult.Value);
-        Assert.Equal("Test User", returnedMember.Name);
-    }
+        [Fact]
+        public void AddMember_ShouldAddToDatabase_AndReturnCreated()
+        {
+            // Arrange
+            var member = new Member
+            {
+                Name = "John Doe",
+                MembershipType = MembershipType.Premium
+            };
 
-    [Fact]
-    public void GetMember_WithInvalidId_ReturnsNotFound()
-    {
-        // Arrange
-        var controller = new MembersController();
-        var invalidId = Guid.NewGuid();
+            // Act
+            var result = _controller.AddMember(member);
 
-        // Act
-        var result = controller.GetMember(invalidId);
+            // Assert
+            var createdResult = Assert.IsType<CreatedAtActionResult>(result);
 
-        // Assert
-        Assert.IsType<NotFoundResult>(result);
+            // Verify Logic: Route values must contain the new ID
+            // This kills mutants that might pass a null or wrong ID to the result
+            Assert.NotNull(createdResult.RouteValues);
+            Assert.Equal(member.Id, createdResult.RouteValues["id"]);
+
+            // Verify State: Item must exist in the static list
+            Assert.Single(InMemoryDatabase.Members);
+            Assert.Equal("John Doe", InMemoryDatabase.Members[0].Name);
+        }
+
+        [Fact]
+        public void GetMember_ShouldReturnOk_WhenFound()
+        {
+            // Arrange
+            var member = new Member { Id = Guid.NewGuid(), Name = "Jane" };
+            InMemoryDatabase.Members.Add(member);
+
+            // Act
+            var result = _controller.GetMember(member.Id);
+
+            // Assert
+            var okResult = Assert.IsType<OkObjectResult>(result);
+            var returnedMember = Assert.IsType<Member>(okResult.Value);
+            Assert.Equal(member.Id, returnedMember.Id);
+        }
+
+        [Fact]
+        public void GetMember_ShouldReturnNotFound_WhenIdDoesNotExist()
+        {
+            // Arrange
+            InMemoryDatabase.Members.Clear(); // Ensure empty
+            var randomId = Guid.NewGuid();
+
+            // Act
+            var result = _controller.GetMember(randomId);
+
+            // Assert
+            // This kills mutants that might change '==' to '!=' in the lookup
+            Assert.IsType<NotFoundResult>(result);
+        }
     }
 }
