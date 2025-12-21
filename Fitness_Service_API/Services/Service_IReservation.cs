@@ -1,6 +1,6 @@
 ﻿using Fitness_Service_API.Entities;
 
-namespace FitnessService.Domain.Services;
+namespace Fitness_Service_API.Services;
 
 public interface IReservationService
 {

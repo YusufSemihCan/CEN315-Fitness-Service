@@ -1,8 +1,8 @@
 ﻿using Fitness_Service_API.Entities;
-using FitnessService.Infrastructure;
+using Fitness_Service_API.Infrastructure;
 using Microsoft.AspNetCore.Mvc;
 
-namespace FitnessService.Api.Controllers;
+namespace Fitness_Service_API.Controllers;
 
 [ApiController]
 [Route("classes")]
@@ -20,16 +20,4 @@ public class ClassesController : ControllerBase
     {
         return Ok(InMemoryDatabase.Classes);
     }
-
-    [HttpDelete("{id}")]
-    public IActionResult DeleteClass(Guid id)
-    {
-        var fitnessClass = InMemoryDatabase.Classes.FirstOrDefault(c => c.Id == id);
-        if (fitnessClass == null)
-            return NotFound();
-
-        InMemoryDatabase.Classes.Remove(fitnessClass);
-        return NoContent();
-    }
-
 }

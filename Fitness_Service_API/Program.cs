@@ -1,4 +1,4 @@
-using FitnessService.Domain.Services;
+using Fitness_Service_API.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 

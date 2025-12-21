@@ -1,7 +1,7 @@
 ﻿using Fitness_Service_API.Entities;
-using FitnessService.Infrastructure;
+using Fitness_Service_API.Infrastructure;
 
-namespace FitnessService.Domain.Services;
+namespace Fitness_Service_API.Services;
 
 public class ReservationService : IReservationService
 {
@@ -14,6 +14,14 @@ public class ReservationService : IReservationService
 
     public Reservation CreateReservation(Member member, FitnessClass fitnessClass)
     {
+
+        if (member == null)
+            throw new ArgumentNullException(nameof(member));
+
+        if (fitnessClass == null)
+            throw new ArgumentNullException(nameof(fitnessClass));
+
+
         if (fitnessClass.Reservations.Count >= fitnessClass.Capacity)
             throw new InvalidOperationException("Class capacity exceeded.");
 

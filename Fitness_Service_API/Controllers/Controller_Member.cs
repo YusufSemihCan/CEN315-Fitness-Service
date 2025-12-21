@@ -1,8 +1,8 @@
 ﻿using Fitness_Service_API.Entities;
-using FitnessService.Infrastructure;
+using Fitness_Service_API.Infrastructure;
 using Microsoft.AspNetCore.Mvc;
 
-namespace FitnessService.Api.Controllers;
+namespace Fitness_Service_API.Controllers;
 
 [ApiController]
 [Route("members")]
@@ -24,16 +24,4 @@ public class MembersController : ControllerBase
 
         return Ok(member);
     }
-
-    [HttpDelete("{id}")]
-    public IActionResult DeleteMember(Guid id)
-    {
-        var member = InMemoryDatabase.Members.FirstOrDefault(m => m.Id == id);
-        if (member == null)
-            return NotFound();
-
-        InMemoryDatabase.Members.Remove(member);
-        return NoContent();
-    }
-
 }

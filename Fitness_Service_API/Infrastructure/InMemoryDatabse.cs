@@ -1,6 +1,6 @@
 ﻿using Fitness_Service_API.Entities;
 
-namespace FitnessService.Infrastructure;
+namespace Fitness_Service_API.Infrastructure;
 
 public static class InMemoryDatabase
 {

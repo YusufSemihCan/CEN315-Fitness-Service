@@ -1,8 +1,6 @@
-﻿using FitnessService.Domain.Services;
-using FitnessService.Infrastructure;
+﻿using Fitness_Service_API.Services;
+using Fitness_Service_API.Infrastructure;
 using Microsoft.AspNetCore.Mvc;
-
-namespace FitnessService.Api.Controllers;
 
 [ApiController]
 [Route("reservations")]
@@ -15,9 +13,8 @@ public class ReservationsController : ControllerBase
         _reservationService = reservationService;
     }
 
-    // POST /reservations
     [HttpPost]
-    public IActionResult Create(Guid memberId, Guid classId)
+    public IActionResult CreateReservation(Guid memberId, Guid classId)
     {
         var member = InMemoryDatabase.Members.FirstOrDefault(m => m.Id == memberId);
         var fitnessClass = InMemoryDatabase.Classes.FirstOrDefault(c => c.Id == classId);
@@ -36,14 +33,12 @@ public class ReservationsController : ControllerBase
         }
     }
 
-    // GET /reservations
     [HttpGet]
     public IActionResult GetAll()
     {
         return Ok(InMemoryDatabase.Reservations);
     }
 
-    // GET /reservations/{id}
     [HttpGet("{id}")]
     public IActionResult GetById(Guid id)
     {
@@ -54,7 +49,6 @@ public class ReservationsController : ControllerBase
         return Ok(reservation);
     }
 
-    // DELETE /reservations/{id}
     [HttpDelete("{id}")]
     public IActionResult Delete(Guid id)
     {
