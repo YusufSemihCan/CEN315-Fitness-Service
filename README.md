@@ -18,7 +18,7 @@ This project was developed using **Test-Driven Development (TDD)** and **Clean A
 * **Concurrency Control:** Atomic transactions prevent overbooking when multiple users attempt to book the last spot simultaneously.
 * **Clean Architecture:** Strict separation of concerns between the API Layer, Business Logic (Services), and Domain Entities.
 * **Resilience:** Dockerized deployment with self-healing capabilities (`restart: always` policy).
-* **Security:** Custom middleware implementing `X-Content-Type-Options` and `X-Frame-Options` headers.
+* **Security:** Implementing ZAP.
 
 ---
 
