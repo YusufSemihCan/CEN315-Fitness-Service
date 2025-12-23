@@ -1,11 +1,11 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
-VisualStudioVersion = 17.14.36717.8 d17.14
+VisualStudioVersion = 17.14.36717.8
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Fitness_Service_API", "Fitness_Service_API\Fitness_Service_API.csproj", "{4F34396D-C7AE-4731-A9AF-8C8A221DCDBE}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Fitness_Service_UnitTest", "Fitness_Service_UnitTest\Fitness_Service_UnitTest.csproj", "{2F16BF8A-79C9-472A-A049-B9F5BF799D4B}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Fitness_Service_Tests", "Fitness_Service_UnitTest\Fitness_Service_Tests.csproj", "{2F16BF8A-79C9-472A-A049-B9F5BF799D4B}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

@@ -4,7 +4,7 @@ using FsCheck;
 using FsCheck.Xunit;
 using System;
 
-namespace Fitness_Service_UnitTest
+namespace Fitness_Service_Test
 {
     public class PricingPropertiesTests
     {

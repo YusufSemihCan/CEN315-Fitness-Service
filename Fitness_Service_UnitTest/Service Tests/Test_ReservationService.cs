@@ -7,7 +7,7 @@ using Xunit;
 // CRITICAL: Forces tests to run one-by-one to prevent "Test Pollution" in the static InMemoryDatabase
 [assembly: CollectionBehavior(DisableTestParallelization = true)]
 
-namespace Fitness_Service_UnitTest.Services
+namespace Fitness_Service_Test.Services
 {
     public class ReservationServiceTests
     {

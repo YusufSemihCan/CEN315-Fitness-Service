@@ -7,7 +7,7 @@ using Moq;
 
 using Xunit;
 
-namespace Fitness_Service_UnitTest.Controllers
+namespace Fitness_Service_Test.Controllers
 {
     public class ReservationsControllerTests
     {

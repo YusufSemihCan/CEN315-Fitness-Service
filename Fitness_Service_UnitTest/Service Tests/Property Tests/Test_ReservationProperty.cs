@@ -6,7 +6,7 @@ using Moq;
 using System;
 using System.Collections.Generic;
 
-namespace Fitness_Service_UnitTest
+namespace Fitness_Service_Test
 {
     public class ReservationPropertiesTests
     {

@@ -5,7 +5,7 @@ using Microsoft.Extensions.Options;
 using Xunit;
 using System.Linq;
 
-namespace Fitness_Service_UnitTest
+namespace Fitness_Service_Test
 {
     public class ServiceRegistrationTests
     {

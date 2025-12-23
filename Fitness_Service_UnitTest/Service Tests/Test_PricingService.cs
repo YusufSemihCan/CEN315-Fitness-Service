@@ -2,7 +2,7 @@ using Fitness_Service_API.Entities;
 using Fitness_Service_API.Services;
 using Xunit;
 
-namespace Fitness_Service_UnitTest.Services
+namespace Fitness_Service_Test.Services
 {
     public class PricingServiceTests
     {

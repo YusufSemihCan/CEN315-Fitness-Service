@@ -4,7 +4,7 @@ using Fitness_Service_API.Infrastructure;
 using Microsoft.AspNetCore.Mvc;
 using Xunit;
 
-namespace Fitness_Service_UnitTest.Controllers
+namespace Fitness_Service_Test.Controllers
 {
     public class MembersControllerTests
     {

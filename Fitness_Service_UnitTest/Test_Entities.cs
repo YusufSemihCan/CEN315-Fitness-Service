@@ -1,7 +1,7 @@
 ﻿using Fitness_Service_API.Entities;
 using Xunit;
 
-namespace Fitness_Service_UnitTest.Entities
+namespace Fitness_Service_Test.Entities
 {
     public class EntityTests
     {
