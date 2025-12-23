@@ -12,7 +12,20 @@ builder.Services.AddApplicationServices();
 var app = builder.Build();
 
 // =================================================================
-// MIDDLEWARE PIPELINE (Remains in Program.cs)
+// SECURITY MIDDLEWARE (OWASP ZAP FIX - Requirement 5.9)
+// =================================================================
+// We insert this FIRST so every request gets these headers immediately.
+app.Use(async (context, next) =>
+{
+    // Prevents browsers from MIME-sniffing a response away from the declared content-type
+    context.Response.Headers.Append("X-Content-Type-Options", "nosniff");
+    // Protects against Clickjacking attacks
+    context.Response.Headers.Append("X-Frame-Options", "DENY");
+    await next();
+});
+
+// =================================================================
+// MIDDLEWARE PIPELINE
 // =================================================================
 if (app.Environment.IsDevelopment())
 {
@@ -23,10 +36,9 @@ if (app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 
 app.UseAuthorization();
-
 app.MapControllers();
 
 app.Run();
 
-// Keep this! It is still good practice for Integration Tests if you add them later.
+// Keep this. For or Integration Tests if you add them later.
 public partial class Program { }

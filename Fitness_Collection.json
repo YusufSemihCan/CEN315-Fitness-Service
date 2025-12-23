@@ -1,0 +1,252 @@
+{
+  "info": {
+    "_postman_id": "b6a7b8c9-0d1e-2f3a-4b5c-6d7e8f9a0b1c",
+    "name": "Fitness Service API Tests",
+    "description": "Full End-to-End tests including GET and DELETE",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "1. Add Member (Standard)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "var jsonData = pm.response.json();",
+              "pm.environment.set(\"memberId\", jsonData.id);",
+              "pm.test(\"Status code is 201\", function () { pm.response.to.have.status(201); });"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{ \"name\": \"John Doe\", \"membershipType\": 0 }"
+        },
+        "url": {
+          "raw": "http://localhost:5078/members",
+          "protocol": "http",
+          "host": [ "localhost" ],
+          "port": "5078",
+          "path": [ "members" ]
+        }
+      }
+    },
+    {
+      "name": "2. Verify Member Exists (GET)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 200\", function () { pm.response.to.have.status(200); });",
+              "var jsonData = pm.response.json();",
+              "pm.test(\"Name matches\", function () { pm.expect(jsonData.name).to.eql(\"John Doe\"); });"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:5078/members/{{memberId}}",
+          "protocol": "http",
+          "host": [ "localhost" ],
+          "port": "5078",
+          "path": [ "members", "{{memberId}}" ]
+        }
+      }
+    },
+    {
+      "name": "3. Create Class (Yoga)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "var jsonData = pm.response.json();",
+              "pm.environment.set(\"classId\", jsonData.id);",
+              "pm.test(\"Status code is 201\", function () { pm.response.to.have.status(201); });"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{ \"name\": \"Yoga\", \"capacity\": 20, \"startTime\": \"2025-12-25T10:00:00\" }"
+        },
+        "url": {
+          "raw": "http://localhost:5078/classes",
+          "protocol": "http",
+          "host": [ "localhost" ],
+          "port": "5078",
+          "path": [ "classes" ]
+        }
+      }
+    },
+    {
+      "name": "4. Get All Classes (GET)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 200\", function () { pm.response.to.have.status(200); });",
+              "var jsonData = pm.response.json();",
+              "pm.test(\"List is not empty\", function () { pm.expect(jsonData.length).to.be.above(0); });"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:5078/classes",
+          "protocol": "http",
+          "host": [ "localhost" ],
+          "port": "5078",
+          "path": [ "classes" ]
+        }
+      }
+    },
+    {
+      "name": "5. Create Reservation (POST)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "var jsonData = pm.response.json();",
+              "pm.environment.set(\"reservationId\", jsonData.id);",
+              "pm.test(\"Price calculated\", function () { pm.expect(jsonData.pricePaid).to.eql(100); });"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:5078/reservations?memberId={{memberId}}&classId={{classId}}",
+          "protocol": "http",
+          "host": [ "localhost" ],
+          "port": "5078",
+          "path": [ "reservations" ],
+          "query": [
+            {
+              "key": "memberId",
+              "value": "{{memberId}}"
+            },
+            {
+              "key": "classId",
+              "value": "{{classId}}"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "6. Get All Reservations (GET)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 200\", function () { pm.response.to.have.status(200); });",
+              "var jsonData = pm.response.json();",
+              "// Find our specific reservation",
+              "var myRes = jsonData.find(r => r.id === pm.environment.get(\"reservationId\"));",
+              "pm.test(\"Reservation found in list\", function () { pm.expect(myRes).to.not.be.undefined; });"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:5078/reservations",
+          "protocol": "http",
+          "host": [ "localhost" ],
+          "port": "5078",
+          "path": [ "reservations" ]
+        }
+      }
+    },
+    {
+      "name": "7. Cancel Reservation (DELETE)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 204 No Content\", function () { pm.response.to.have.status(204); });"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "DELETE",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:5078/reservations/{{reservationId}}",
+          "protocol": "http",
+          "host": [ "localhost" ],
+          "port": "5078",
+          "path": [ "reservations", "{{reservationId}}" ]
+        }
+      }
+    },
+    {
+      "name": "8. Verify Cancellation (Negative Test)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 404 Not Found\", function () { pm.response.to.have.status(404); });"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:5078/reservations/{{reservationId}}",
+          "protocol": "http",
+          "host": [ "localhost" ],
+          "port": "5078",
+          "path": [ "reservations", "{{reservationId}}" ]
+        }
+      }
+    }
+  ]
+}

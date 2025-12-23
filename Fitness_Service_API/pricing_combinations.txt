@@ -1,0 +1,10 @@
+﻿# PICT Output for Fitness Service Pricing
+# Parameters: Membership, TimeOfDay, OccupancyLevel
+
+Membership	TimeOfDay	OccupancyLevel
+Standard	OffPeak	    Low
+Standard	Peak	    High
+Premium	    OffPeak	    High
+Premium	    Peak	    Low
+Student	    OffPeak	    Low
+Student	    Peak	    High
