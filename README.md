@@ -2,8 +2,6 @@
 
 # 🏋️ Fitness Service API (CEN315 Term Project)
 ![.NET Version](https://img.shields.io/badge/.NET-8.0-purple)
-![Docker](https://img.shields.io/badge/Docker-Ready-blue)
-![License](https://img.shields.io/badge/License-MIT-green)
 
 ## 📖 Executive Summary
 The **Fitness Service API** is a robust RESTful backend built with **.NET 8** designed to manage a modern fitness center. It handles member registrations, class scheduling, and complex reservation logic with dynamic pricing.
