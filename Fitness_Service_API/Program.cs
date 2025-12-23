@@ -9,6 +9,15 @@ var builder = WebApplication.CreateBuilder(args);
 // This single line replaces all the builder.Services.Add... calls
 builder.Services.AddApplicationServices();
 
+// Line A: Add CORS Policy
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowAll",
+        builder => builder.AllowAnyOrigin()
+                          .AllowAnyMethod()
+                          .AllowAnyHeader());
+});
+
 var app = builder.Build();
 
 // =================================================================
@@ -34,6 +43,9 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+// Line B: Use the Policy
+app.UseCors("AllowAll");
 
 app.UseAuthorization();
 app.MapControllers();

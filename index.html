@@ -1,0 +1,136 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fitness Service Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f8f9fa;
+            padding: 20px;
+        }
+
+        .card {
+            margin-bottom: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="text-center mb-4">🏋️ Fitness Service Manager</h1>
+
+        <div class="row">
+            <div class="col-md-6">
+                <div class="card p-3">
+                    <h3>1. New Member</h3>
+                    <input type="text" id="memberName" class="form-control mb-2" placeholder="Enter Name (e.g., John)">
+                    <select id="memberType" class="form-select mb-2">
+                        <option value="0">Standard</option>
+                        <option value="1">Premium</option>
+                    </select>
+                    <button onclick="createMember()" class="btn btn-primary w-100">Create Member</button>
+                    <div id="memberResult" class="mt-2 text-success"></div>
+                </div>
+            </div>
+
+            <div class="col-md-6">
+                <div class="card p-3">
+                    <h3>2. Add Class</h3>
+                    <input type="text" id="className" class="form-control mb-2" placeholder="Class Name (e.g., Yoga)">
+                    <button onclick="createClass()" class="btn btn-success w-100">Create Class</button>
+                    <div id="classResult" class="mt-2 text-success"></div>
+                </div>
+            </div>
+        </div>
+
+        <hr>
+
+        <div class="card p-3">
+            <h3>3. Book a Reservation</h3>
+            <div class="row">
+                <div class="col-md-5">
+                    <label>Member ID:</label>
+                    <input type="text" id="bookingMemberId" class="form-control" placeholder="Paste Member ID here">
+                </div>
+                <div class="col-md-5">
+                    <label>Class ID:</label>
+                    <input type="text" id="bookingClassId" class="form-control" placeholder="Paste Class ID here">
+                </div>
+                <div class="col-md-2 d-flex align-items-end">
+                    <button onclick="bookClass()" class="btn btn-warning w-100 text-white">Book Now</button>
+                </div>
+            </div>
+            <div id="bookingResult" class="mt-3 fw-bold"></div>
+        </div>
+    </div>
+
+    <script>
+        // CHANGE THIS PORT IF NEEDED (Check your VS Code Terminal)
+        const API_URL = "http://localhost:5078";
+
+        async function createMember() {
+            const name = document.getElementById('memberName').value;
+            const type = parseInt(document.getElementById('memberType').value);
+
+            try {
+                const res = await fetch(`${API_URL}/members`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ name: name, membershipType: type })
+                });
+                if(res.ok) {
+                    const data = await res.json();
+                    document.getElementById('memberResult').innerHTML =
+                        `Success! ID: <b>${data.id}</b> <button class="btn btn-sm btn-outline-secondary" onclick="copy('${data.id}', 'bookingMemberId')">Copy</button>`;
+                } else alert("Error creating member");
+            } catch (e) { alert("API Connection Failed. Is it running?"); }
+        }
+
+        async function createClass() {
+            const name = document.getElementById('className').value;
+            // Defaults to tomorrow at 10am
+            const time = new Date();
+            time.setDate(time.getDate() + 1);
+            time.setHours(10, 0, 0);
+
+            try {
+                const res = await fetch(`${API_URL}/classes`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ name: name, capacity: 10, startTime: time.toISOString() })
+                });
+                if(res.ok) {
+                    const data = await res.json();
+                    document.getElementById('classResult').innerHTML =
+                        `Success! ID: <b>${data.id}</b> <button class="btn btn-sm btn-outline-secondary" onclick="copy('${data.id}', 'bookingClassId')">Copy</button>`;
+                } else alert("Error creating class");
+            } catch (e) { alert("API Connection Failed"); }
+        }
+
+        async function bookClass() {
+            const mId = document.getElementById('bookingMemberId').value;
+            const cId = document.getElementById('bookingClassId').value;
+
+            try {
+                const res = await fetch(`${API_URL}/reservations?memberId=${mId}&classId=${cId}`, {
+                    method: 'POST'
+                });
+                if(res.ok) {
+                    const data = await res.json();
+                    document.getElementById('bookingResult').className = "mt-3 text-success";
+                    document.getElementById('bookingResult').innerText = `✅ Booked! Price Paid: $${data.pricePaid}`;
+                } else {
+                    document.getElementById('bookingResult').className = "mt-3 text-danger";
+                    document.getElementById('bookingResult').innerText = "❌ Booking Failed (Full or Invalid ID)";
+                }
+            } catch (e) { alert("API Error"); }
+        }
+
+        function copy(text, targetId) {
+            document.getElementById(targetId).value = text;
+        }
+    </script>
+</body>
+</html>
