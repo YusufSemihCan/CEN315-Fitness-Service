@@ -1,0 +1,358 @@
+{
+	"id": "f99e6f8a-27a0-4de5-9b90-b37ed235dd46",
+	"name": "Fitness Service API Tests",
+	"timestamp": "2025-12-23T12:25:47.485Z",
+	"collection_id": "51007556-435ffb63-5a00-46bb-9331-bcc8cb9a1c54",
+	"folder_id": 0,
+	"environment_id": "0",
+	"totalPass": 33,
+	"delay": 0,
+	"persist": true,
+	"status": "finished",
+	"startedAt": "2025-12-23T12:25:45.016Z",
+	"totalFail": 0,
+	"results": [
+		{
+			"id": "727b706a-b5f2-411d-900f-b30ccbb619fe",
+			"name": "1. Add Member (Standard)",
+			"url": "http://localhost:5078/members",
+			"time": 2,
+			"responseCode": {
+				"code": 201,
+				"name": "Created"
+			},
+			"tests": {
+				"Status code is 201": true
+			},
+			"testPassFailCounts": {
+				"Status code is 201": {
+					"pass": 3,
+					"fail": 0
+				}
+			},
+			"times": [
+				57,
+				3,
+				2
+			],
+			"allTests": [
+				{
+					"Status code is 201": true
+				},
+				{
+					"Status code is 201": true
+				},
+				{
+					"Status code is 201": true
+				}
+			]
+		},
+		{
+			"id": "1e81524e-57e6-4258-86b3-729e23247aa7",
+			"name": "2. Verify Member Exists (GET)",
+			"url": "http://localhost:5078/members/38b97ef2-61cd-4c34-807c-8e0f7bfff97d",
+			"time": 2,
+			"responseCode": {
+				"code": 200,
+				"name": "OK"
+			},
+			"tests": {
+				"Status code is 200": true,
+				"Name matches": true
+			},
+			"testPassFailCounts": {
+				"Status code is 200": {
+					"pass": 3,
+					"fail": 0
+				},
+				"Name matches": {
+					"pass": 3,
+					"fail": 0
+				}
+			},
+			"times": [
+				5,
+				2,
+				2
+			],
+			"allTests": [
+				{
+					"Status code is 200": true,
+					"Name matches": true
+				},
+				{
+					"Status code is 200": true,
+					"Name matches": true
+				},
+				{
+					"Status code is 200": true,
+					"Name matches": true
+				}
+			]
+		},
+		{
+			"id": "797212c6-b739-4073-96e1-19b27dcc9481",
+			"name": "3. Create Class (Yoga)",
+			"url": "http://localhost:5078/classes",
+			"time": 2,
+			"responseCode": {
+				"code": 201,
+				"name": "Created"
+			},
+			"tests": {
+				"Status code is 201": true
+			},
+			"testPassFailCounts": {
+				"Status code is 201": {
+					"pass": 3,
+					"fail": 0
+				}
+			},
+			"times": [
+				14,
+				2,
+				2
+			],
+			"allTests": [
+				{
+					"Status code is 201": true
+				},
+				{
+					"Status code is 201": true
+				},
+				{
+					"Status code is 201": true
+				}
+			]
+		},
+		{
+			"id": "c122aeac-2807-440b-9ec7-3c0e6c338924",
+			"name": "4. Get All Classes (GET)",
+			"url": "http://localhost:5078/classes",
+			"time": 2,
+			"responseCode": {
+				"code": 200,
+				"name": "OK"
+			},
+			"tests": {
+				"Status code is 200": true,
+				"List is not empty": true
+			},
+			"testPassFailCounts": {
+				"Status code is 200": {
+					"pass": 3,
+					"fail": 0
+				},
+				"List is not empty": {
+					"pass": 3,
+					"fail": 0
+				}
+			},
+			"times": [
+				3,
+				2,
+				2
+			],
+			"allTests": [
+				{
+					"Status code is 200": true,
+					"List is not empty": true
+				},
+				{
+					"Status code is 200": true,
+					"List is not empty": true
+				},
+				{
+					"Status code is 200": true,
+					"List is not empty": true
+				}
+			]
+		},
+		{
+			"id": "cf558f2e-a0f6-445e-a69d-4fb660adccf0",
+			"name": "5. Create Reservation (POST)",
+			"url": "http://localhost:5078/reservations?memberId=38b97ef2-61cd-4c34-807c-8e0f7bfff97d&classId=ea7afd9e-c738-44a6-b5dc-956dfafc297a",
+			"time": 2,
+			"responseCode": {
+				"code": 200,
+				"name": "OK"
+			},
+			"tests": {
+				"Price calculated": true
+			},
+			"testPassFailCounts": {
+				"Price calculated": {
+					"pass": 3,
+					"fail": 0
+				}
+			},
+			"times": [
+				9,
+				2,
+				2
+			],
+			"allTests": [
+				{
+					"Price calculated": true
+				},
+				{
+					"Price calculated": true
+				},
+				{
+					"Price calculated": true
+				}
+			]
+		},
+		{
+			"id": "60fb8394-3e31-45fb-b180-a1db0319b866",
+			"name": "6. Get All Reservations (GET)",
+			"url": "http://localhost:5078/reservations",
+			"time": 2,
+			"responseCode": {
+				"code": 200,
+				"name": "OK"
+			},
+			"tests": {
+				"Status code is 200": true,
+				"Reservation found in list": true
+			},
+			"testPassFailCounts": {
+				"Status code is 200": {
+					"pass": 3,
+					"fail": 0
+				},
+				"Reservation found in list": {
+					"pass": 3,
+					"fail": 0
+				}
+			},
+			"times": [
+				3,
+				2,
+				2
+			],
+			"allTests": [
+				{
+					"Status code is 200": true,
+					"Reservation found in list": true
+				},
+				{
+					"Status code is 200": true,
+					"Reservation found in list": true
+				},
+				{
+					"Status code is 200": true,
+					"Reservation found in list": true
+				}
+			]
+		},
+		{
+			"id": "d862ac88-e5f4-40e8-8c3b-e10ff4aa47ef",
+			"name": "7. Cancel Reservation (DELETE)",
+			"url": "http://localhost:5078/reservations/6fb5137a-7a20-42df-bc0d-b3d083dc7c38",
+			"time": 2,
+			"responseCode": {
+				"code": 204,
+				"name": "No Content"
+			},
+			"tests": {
+				"Status code is 204 No Content": true
+			},
+			"testPassFailCounts": {
+				"Status code is 204 No Content": {
+					"pass": 3,
+					"fail": 0
+				}
+			},
+			"times": [
+				4,
+				2,
+				2
+			],
+			"allTests": [
+				{
+					"Status code is 204 No Content": true
+				},
+				{
+					"Status code is 204 No Content": true
+				},
+				{
+					"Status code is 204 No Content": true
+				}
+			]
+		},
+		{
+			"id": "3bb44dd1-2d9b-4662-8077-41075eecddc2",
+			"name": "8. Verify Cancellation (Negative Test)",
+			"url": "http://localhost:5078/reservations/6fb5137a-7a20-42df-bc0d-b3d083dc7c38",
+			"time": 3,
+			"responseCode": {
+				"code": 404,
+				"name": "Not Found"
+			},
+			"tests": {
+				"Status code is 404 Not Found": true
+			},
+			"testPassFailCounts": {
+				"Status code is 404 Not Found": {
+					"pass": 3,
+					"fail": 0
+				}
+			},
+			"times": [
+				11,
+				2,
+				3
+			],
+			"allTests": [
+				{
+					"Status code is 404 Not Found": true
+				},
+				{
+					"Status code is 404 Not Found": true
+				},
+				{
+					"Status code is 404 Not Found": true
+				}
+			]
+		}
+	],
+	"count": 3,
+	"totalTime": 140,
+	"collection": {
+		"requests": [
+			{
+				"id": "727b706a-b5f2-411d-900f-b30ccbb619fe",
+				"method": "POST"
+			},
+			{
+				"id": "1e81524e-57e6-4258-86b3-729e23247aa7",
+				"method": "GET"
+			},
+			{
+				"id": "797212c6-b739-4073-96e1-19b27dcc9481",
+				"method": "POST"
+			},
+			{
+				"id": "c122aeac-2807-440b-9ec7-3c0e6c338924",
+				"method": "GET"
+			},
+			{
+				"id": "cf558f2e-a0f6-445e-a69d-4fb660adccf0",
+				"method": "POST"
+			},
+			{
+				"id": "60fb8394-3e31-45fb-b180-a1db0319b866",
+				"method": "GET"
+			},
+			{
+				"id": "d862ac88-e5f4-40e8-8c3b-e10ff4aa47ef",
+				"method": "DELETE"
+			},
+			{
+				"id": "3bb44dd1-2d9b-4662-8077-41075eecddc2",
+				"method": "GET"
+			}
+		]
+	}
+}
