@@ -58,7 +58,7 @@ This project was developed using **Test-Driven Development (TDD)** and **Clean A
     dotnet run
     ```
 4.  Open your browser to the Swagger UI:
-    * `http://localhost:5000/swagger` (or port shown in terminal)
+    * `http://localhost:5078/swagger` (or port shown in terminal)
 
 ### Option 2: Run with Docker
 1.  Build and run the container:
