@@ -1,28 +1,42 @@
-name: .NET CI
+name: .NET CI & Docker Build
 
 on:
   push:
-    branches: [ "main" ]
+    branches: [ "main", "master" ] # Covers both common names
   pull_request:
-    branches: [ "main" ]
+    branches: [ "main", "master" ]
+  workflow_dispatch:               # <--- ADDS THE MANUAL RUN BUTTON
 
 jobs:
-  build:
+  build-and-test:
     runs-on: ubuntu-latest
 
     steps:
+    # 1. Check out the code
     - uses: actions/checkout@v4
     
+    # 2. Setup .NET 8
     - name: Setup .NET
       uses: actions/setup-dotnet@v4
       with:
         dotnet-version: 8.0.x
         
+    # 3. Restore (Explicitly pointing to the Solution file)
     - name: Restore dependencies
-      run: dotnet restore
+      run: dotnet restore Fitness_Service.sln
       
-    - name: Build
-      run: dotnet build --no-restore
+    # 4. Build (Explicitly pointing to the Solution file)
+    - name: Build .NET Project
+      run: dotnet build Fitness_Service.sln --no-restore --configuration Release
       
-    - name: Test
-      run: dotnet test --no-build --verbosity normal
+    # 5. Run Tests (This finds all tests in the solution automatically)
+    - name: Run Unit & Integration Tests
+      run: dotnet test Fitness_Service.sln --no-build --configuration Release --verbosity normal
+
+    # 6. Docker Build (Requirement 5.11)
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+
+    - name: Build Docker Image
+      # Context is "." (root) and File is "Dockerfile" (in root)
+      run: docker build . --file Dockerfile --tag fitness-service:latest
